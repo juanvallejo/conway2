@@ -84,15 +84,12 @@ void init(const int width, const int height) {
 	bool matrix[ns_width * ns_height];
 	memset(matrix, false, sizeof(matrix) / sizeof(matrix[0]));
 
-	std::cout << std::setw(4) << ns_width << " x " << ns_height << std::endl;
-
 	// set random cells alive
 	for(int i = 0; i < ns_width * ns_height; i++) {
 		if(std::rand() % 100 < 15) { matrix[i] = true; }
 	}
 
 	draw(matrix, ns_width, ns_height);
-
 	endwin();
 
 }
