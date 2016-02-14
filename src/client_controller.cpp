@@ -1,4 +1,5 @@
 #include <iostream>
+#include "controller.h"
 #include "client_controller.h"
 
 bool client::REQUEST_SERVER_DATA = true;
@@ -14,23 +15,25 @@ void client::init(const short port) {
 		std::error_code error;
 		size_t stream_size;
 
-        asio::connect(socket, endpoint);
 		std::cout << "Client ready." <<std::endl;
 
 		char server_data[1024];
 
-		// while(REQUEST_SERVER_DATA) {
+		while(REQUEST_SERVER_DATA) {
+			asio::connect(socket, endpoint);
 			socket.send(asio::buffer("HEARTBEAT"));
 			stream_size = socket.read_some(asio::buffer(server_data), error);
+			socket.close();
 
 			std::cout << "Server data: " << server_data << std::endl;
+			memset(server_data, 0, stream_size);
 
 			if(error)
 				if(error != asio::error::eof)
 					std::cout << "status: " << error.message() << std::endl;
 
-			socket.close();
-		// }
+			controller::sleep(229);
+		}
 
 	} catch(std::exception& e) {
 		std::cerr << "Exception: " << e.what() << std::endl;

@@ -40,7 +40,6 @@ void server::init(const short port) {
 				acceptor.accept(socket);
 				stream_size = socket.read_some(asio::buffer(client_data), error);
 
-				std::cout << "heartbeat> " << client_data << std::endl;
 				memset(client_data, 0, stream_size);
 
 				// socket.send(asio::buffer("Message from server"));
