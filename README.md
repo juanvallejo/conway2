@@ -35,4 +35,4 @@ make
 
 ##TODO
 
-Add multiple client support
+Make each client render part of its grid
