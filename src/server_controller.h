@@ -8,6 +8,11 @@ class server {
 public:
 	static std::mutex smutex;
 	static void init(const short);
+
+	/**
+	 * Loads conway's array values into a string buffer
+	 */
+	static void load_game_data(std::ostream&);
 };
 
 #endif

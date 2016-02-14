@@ -13,12 +13,17 @@
 
 std::mutex controller::cmutex;
 
+int controller::game_width = 0;
+int controller::game_height = 0;
+
+bool* controller::game_matrix = 0;
+
 void sigint_handler(int sig) {
 	endwin();
 	exit(0);
 }
 
-void draw(bool matrix[], int width, int height) {
+void draw(bool* matrix, int width, int height) {
 
 	const char LINEB[] = "\n";
 
@@ -72,7 +77,7 @@ void draw(bool matrix[], int width, int height) {
 
 }
 
-void init_conway(const int width, const int height) {
+void controller::init_game(const int width, const int height) {
 
 	std::srand(std::time(0));
 
@@ -84,27 +89,27 @@ void init_conway(const int width, const int height) {
 	initscr();
 	getmaxyx(stdscr, ns_width, ns_height);
 
-	ns_width = std::min(width, ns_width); 
-	ns_height = std::min(height, ns_height); 
+	controller::set_game_width(std::min(width, ns_width));
+	controller::set_game_height(std::min(height, ns_height));
 
-	bool matrix[ns_width * ns_height];
-	memset(matrix, false, sizeof(matrix) / sizeof(matrix[0]));
+	controller::set_game_matrix(new bool[controller::get_game_width() * controller::get_game_height()]);
+	memset(controller::get_game_matrix(), false, controller::get_game_width() * controller::get_game_height());
 
 	// set random cells alive
-	for(int i = 0; i < ns_width * ns_height; i++) {
-		if(std::rand() % 100 < 15) { matrix[i] = true; }
+	for(int i = 0; i < controller::get_game_width() * controller::get_game_height(); i++) {
+		if(std::rand() % 100 < 15) { controller::get_game_matrix()[i] = true; }
 	}
 
-	draw(matrix, ns_width, ns_height);
+	draw(controller::get_game_matrix(), controller::get_game_width(), controller::get_game_height());
 	endwin();
 
 }
 
 void controller::init_server(const int width, const int height) {
 	std::thread tserver(server::init, DEFAULT_TCP_PORT);
-	std::thread tconway(init_conway, width, height);
+	std::thread tgame(controller::init_game, width, height);
 	tserver.join();
-	tconway.join();
+	tgame.join();
 }
 
 void controller::init_client() {
