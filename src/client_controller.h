@@ -5,6 +5,7 @@
 
 class client {
 public:
+	static bool REQUEST_SERVER_DATA;
 	static void init(const short);
 };
 

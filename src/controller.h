@@ -10,6 +10,8 @@ private:
 	static int game_width;
 	static int game_height;
 	static bool* game_matrix;
+
+	static struct timespec timer;
 public:
 	static std::mutex cmutex;
 
@@ -30,6 +32,9 @@ public:
 	static inline int get_game_height() { return game_height; }
 
 	static inline bool* get_game_matrix() { return game_matrix; }
+
+	static timespec* get_timer(int);
+	static void sleep(int);
 };
 
 #endif

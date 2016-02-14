@@ -1,6 +1,8 @@
 #include <iostream>
 #include "client_controller.h"
 
+bool client::REQUEST_SERVER_DATA = true;
+
 void client::init(const short port) {
 
 	try {
@@ -17,29 +19,18 @@ void client::init(const short port) {
 
 		char server_data[1024];
 
-		// asio::streambuf server_mes;
-        // asio::streambuf::mutable_buffers_type bufs = server_mes.prepare(1024);
+		// while(REQUEST_SERVER_DATA) {
+			socket.send(asio::buffer("HEARTBEAT"));
+			stream_size = socket.read_some(asio::buffer(server_data), error);
 
-		socket.send(asio::buffer("HEARTBEAT"));
+			std::cout << "Server data: " << server_data << std::endl;
 
-		// stream_size = socket.receive(bufs);
-		// server_mes.commit(stream_size);
+			if(error)
+				if(error != asio::error::eof)
+					std::cout << "status: " << error.message() << std::endl;
 
-		// std::cout << "Received: " << std::endl;
-		// std::cout << &server_mes << std::endl;	
-
-		stream_size = socket.read_some(asio::buffer(server_data), error);
-
-		std::cout << "Server data: " << server_data << std::endl;
-
-		// asio::write(socket, asio::buffer("Message from server", stream_size));
-
-		if(error) {
-			if(error != asio::error::eof)
-				std::cout << "status: " << error.message() << std::endl;
-		}	
-
-		// socket.close();
+			socket.close();
+		// }
 
 	} catch(std::exception& e) {
 		std::cerr << "Exception: " << e.what() << std::endl;

@@ -12,6 +12,7 @@
 #include "client_controller.h"
 
 std::mutex controller::cmutex;
+timespec controller::timer = {0};
 
 int controller::game_width = 0;
 int controller::game_height = 0;
@@ -26,12 +27,6 @@ void sigint_handler(int sig) {
 void draw(bool* matrix, int width, int height) {
 
 	const char LINEB[] = "\n";
-
-	// setup nanosleep
-	int sleep_m = 328;
-	struct timespec sleep = {0};
-	sleep.tv_sec = 0;
-	sleep.tv_nsec = sleep_m * 1000000L;
 
 	while(true) {
 		clear();
@@ -72,7 +67,7 @@ void draw(bool* matrix, int width, int height) {
 		}
 
 		refresh();
-		nanosleep(&sleep, (struct timespec *)NULL);
+		controller::sleep(229);
 	}
 
 }
@@ -114,4 +109,15 @@ void controller::init_server(const int width, const int height) {
 
 void controller::init_client() {
 	client::init(DEFAULT_TCP_PORT);
+}
+
+timespec* controller::get_timer(int timeout) {
+	if(timer.tv_nsec == timeout * 1000000L) { return &timer; }
+	timer.tv_sec = 0;
+	timer.tv_nsec = timeout * 1000000L;
+	return &timer;
+}
+
+void controller::sleep(int timeout) {
+	nanosleep(get_timer(timeout), (struct timespec *)NULL);
 }

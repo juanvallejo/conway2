@@ -6,6 +6,7 @@
 
 class server {
 public:
+	static bool ACCEPT_CLIENT_CONN;
 	static std::mutex smutex;
 	static void init(const short);
 

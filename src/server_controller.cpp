@@ -3,6 +3,7 @@
 #include "controller.h"
 #include "server_controller.h"
 
+bool server::ACCEPT_CLIENT_CONN = true;
 std::mutex server::smutex;
 
 void server::load_game_data(std::ostream& stream) {
@@ -35,41 +36,28 @@ void server::init(const short port) {
 		std::ostream buf_conway_stream(&buf_conway);
 
 		{
-			acceptor.accept(socket);
-			stream_size = socket.read_some(asio::buffer(client_data), error);
+			while(server::ACCEPT_CLIENT_CONN) {
+				acceptor.accept(socket);
+				stream_size = socket.read_some(asio::buffer(client_data), error);
 
-			std::cout << "heartbeat> " << client_data << std::endl;
+				std::cout << "heartbeat> " << client_data << std::endl;
+				memset(client_data, 0, stream_size);
 
-			// socket.send(asio::buffer("Message from server"));
-			server::load_game_data(buf_conway_stream);
-			stream_size = socket.send(buf_conway.data());
-			buf_conway.consume(stream_size);
+				// socket.send(asio::buffer("Message from server"));
+				server::load_game_data(buf_conway_stream);
+				stream_size = socket.send(buf_conway.data());
+				buf_conway.consume(stream_size);
 
-			if(error) {
-				if(error != asio::error::eof)
-					std::cout << "status: " << error.message() << std::endl;
+				socket.close();
+
+				if(error)
+					if(error != asio::error::eof)
+						std::cout << "status: " << error.message() << std::endl;
 			}
-
-			// while(asio::read(socket, sbuf, error)) {
-				
-			// 	server::load_game_data(buf_conway_stream);
-			// 	stream_size = socket.send(buf_conway.data());
-			// 	buf_conway.consume(stream_size);
-
-			// 	std::cout << &sbuf << std::endl;
-
-			// 	if(error) {
-			// 		if(error != asio::error::eof)
-			// 			std::cout << "status: " << error.message() << std::endl;
-			// 		break;
-			// 	}
-			// }
-
-			// socket.close();
 		}
 
 	} catch(std::exception& e) {
-		std::cerr << e.what() << std::endl;
+		std::cerr << "Exception: " << e.what() << std::endl;
 	}
 
 }
