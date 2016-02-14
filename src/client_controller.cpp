@@ -1,10 +1,14 @@
 #include <iostream>
+#include <ncurses.h>
 #include "controller.h"
 #include "client_controller.h"
 
 bool client::REQUEST_SERVER_DATA = true;
 
 void client::init(const short port) {
+
+	signal(SIGINT, controller::sigint_handler);
+	initscr();
 
 	try {
 		asio::io_service io_service;
@@ -20,13 +24,15 @@ void client::init(const short port) {
 		char server_data[1024];
 
 		while(REQUEST_SERVER_DATA) {
+
+			memset(server_data, 0, stream_size);
+			
 			asio::connect(socket, endpoint);
 			socket.send(asio::buffer("HEARTBEAT"));
 			stream_size = socket.read_some(asio::buffer(server_data), error);
 			socket.close();
 
-			std::cout << "Server data: " << server_data << std::endl;
-			memset(server_data, 0, stream_size);
+			client::parse_game_data(server_data);
 
 			if(error)
 				if(error != asio::error::eof)
@@ -37,6 +43,36 @@ void client::init(const short port) {
 
 	} catch(std::exception& e) {
 		std::cerr << "Exception: " << e.what() << std::endl;
+		endwin();
 	}
+
+	endwin();
+
+}
+
+void client::parse_game_data(const char* game_data) {
+
+	char char_w[4];
+	char char_h[4];
+
+	int width;
+	int height;
+
+	strncpy(char_w, game_data, 2);
+	strncpy(char_h, &game_data[2], 2);
+
+	width = atoi(char_w);
+	height = atoi(char_h);
+
+	bool* matrix = new bool[width * height];
+	memset(matrix, true, width * height);
+
+	for(int i = 4; i < (width * height) + 4; i++) {
+		matrix[i - 4] = (game_data[i] == '1');
+	}
+
+	controller::draw(matrix, width, height);
+
+	delete matrix;
 
 }

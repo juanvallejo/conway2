@@ -8,6 +8,8 @@ std::mutex server::smutex;
 
 void server::load_game_data(std::ostream& stream) {
 	if(!controller::get_game_matrix()) return;
+	stream << controller::get_game_width();
+	stream << controller::get_game_height();
 	for(int i = 0; i < controller::get_game_width() * controller::get_game_height(); i++)
 		stream << controller::get_game_matrix()[i];
 }

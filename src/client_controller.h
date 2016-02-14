@@ -7,6 +7,7 @@ class client {
 public:
 	static bool REQUEST_SERVER_DATA;
 	static void init(const short);
+	static void parse_game_data(const char*);
 };
 
 #endif

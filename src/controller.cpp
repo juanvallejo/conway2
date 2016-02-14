@@ -19,56 +19,55 @@ int controller::game_height = 0;
 
 bool* controller::game_matrix = 0;
 
-void sigint_handler(int sig) {
+void controller::sigint_handler(int sig) {
 	endwin();
 	exit(0);
 }
 
-void draw(bool* matrix, int width, int height) {
+/**
+ * Draw 2d grid to screen given a one-dimensional boolean
+ * array, a width, and height
+ */
+void controller::draw(bool* matrix, int width, int height) {
 
-	const char LINEB[] = "\n";
+	clear();
 
-	while(true) {
-		clear();
+	for(int x = 0; x < height; x++) {
+		for(int y = 0; y < width; y++) {
+			printw("%3s", matrix[x * width + y] ? " x " : "   ");
 
-		for(int x = 0; x < height; x++) {
-			for(int y = 0; y < width; y++) {
-				printw("%3s", matrix[x * width + y] ? " x " : "   ");
+			int live_n = 0;
 
-				int live_n = 0;
-
-				// check top neighbor
-				if(x > 1) {
-					if(matrix[(x - 1) * width + y]) { live_n++; }
-					// check top left neighbor
-					if(y > 1) { if(matrix[(x - 1) * width + (y - 1)]) { live_n++; } }
-					// check top right neighbor
-					if(y < width - 1) { if(matrix[(x - 1) * width + (y + 1)]) { live_n++; } }
-				}
-
-				// check bottom neighbor
-				if(x < height - 1) {
-					if(matrix[(x + 1) * width + y]) { live_n++; }
-					// check bottom left neighbor
-					if(y > 1) { if(matrix[(x + 1) * width + (y - 1)]) { live_n++; } }
-					// check bottom right neighbor
-					if(y < width - 1) { if(matrix[(x + 1) * width + (y + 1)]) { live_n++; } }
-				}
-
-				// check left neighbor
-				if(y > 1) { if(matrix[x * width + (y - 1)]) { live_n++; } }
-				// check right neighbor
-				if(y < width - 1) { if(matrix[x * width + (y + 1)]) { live_n++; } }
-
-				if(live_n < 2 || live_n > 3) { matrix[x * width + y] = false; }
-				if(live_n == 3) { matrix[x * width + y] = true; }
+			// check top neighbor
+			if(x > 1) {
+				if(matrix[(x - 1) * width + y]) { live_n++; }
+				// check top left neighbor
+				if(y > 1) { if(matrix[(x - 1) * width + (y - 1)]) { live_n++; } }
+				// check top right neighbor
+				if(y < width - 1) { if(matrix[(x - 1) * width + (y + 1)]) { live_n++; } }
 			}
-			printw(LINEB);
-		}
 
-		refresh();
-		controller::sleep(229);
+			// check bottom neighbor
+			if(x < height - 1) {
+				if(matrix[(x + 1) * width + y]) { live_n++; }
+				// check bottom left neighbor
+				if(y > 1) { if(matrix[(x + 1) * width + (y - 1)]) { live_n++; } }
+				// check bottom right neighbor
+				if(y < width - 1) { if(matrix[(x + 1) * width + (y + 1)]) { live_n++; } }
+			}
+
+			// check left neighbor
+			if(y > 1) { if(matrix[x * width + (y - 1)]) { live_n++; } }
+			// check right neighbor
+			if(y < width - 1) { if(matrix[x * width + (y + 1)]) { live_n++; } }
+
+			if(live_n < 2 || live_n > 3) { matrix[x * width + y] = false; }
+			if(live_n == 3) { matrix[x * width + y] = true; }
+		}
+		printw("\n");
 	}
+
+	refresh();
 
 }
 
@@ -95,7 +94,11 @@ void controller::init_game(const int width, const int height) {
 		if(std::rand() % 100 < 15) { controller::get_game_matrix()[i] = true; }
 	}
 
-	draw(controller::get_game_matrix(), controller::get_game_width(), controller::get_game_height());
+	while(true) {
+		controller::draw(controller::get_game_matrix(), controller::get_game_width(), controller::get_game_height());
+		controller::sleep(229);
+	}
+
 	endwin();
 
 }
