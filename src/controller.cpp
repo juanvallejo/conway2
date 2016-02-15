@@ -110,8 +110,19 @@ void controller::init_server(const int width, const int height) {
 	tgame.join();
 }
 
-void controller::init_client() {
-	client::init(DEFAULT_TCP_PORT);
+void controller::init_client(char* arg) {
+	if(arg != NULL) {
+		if(std::strcmp(arg, "--tl") == 0)
+			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_TL);
+		if(std::strcmp(arg, "--tr") == 0)
+			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_TR);
+		if(std::strcmp(arg, "--bl") == 0)
+			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_BL);
+		if(std::strcmp(arg, "--br") == 0)
+			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_BR);
+		return;
+	}
+	client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_ALL);
 }
 
 timespec* controller::get_timer(int timeout) {

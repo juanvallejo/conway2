@@ -16,7 +16,7 @@ public:
 	// initialize server controller
 	// handles game data transfer
 	static void init_server(const int, const int);
-	static void init_client();
+	static void init_client(char *);
 
 	// initialize main game matrix
 	// receives a width and height
