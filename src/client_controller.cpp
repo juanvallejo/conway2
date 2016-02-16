@@ -99,7 +99,7 @@ void client::parse_game_data(const char* game_data) {
 		if(partial) {
 			if((i - 4) % width >= off_y && (i - 4) % width < off_y + n_width) {
 				if(std::floor((i - 4) / width) >= off_x && std::floor((i - 4) / width) < off_x + n_height) {
-					matrix_cell = ((std::floor((i - 4) / width) - off_x) * n_width) + ((i - 4) % n_width - off_y);
+					matrix_cell = ((std::floor((i - 4) / width) - off_x) * n_width) + ((i - 4) % n_width);
 					matrix[matrix_cell] = (game_data[i] == '1');
 				}
 			}
@@ -107,6 +107,7 @@ void client::parse_game_data(const char* game_data) {
 			matrix[i - 4] = (game_data[i] == '1');
 	}
 
+	// std::cout << "off_x " << off_x << " off_y" << off_y << std::endl;
 	controller::draw(matrix, n_width, n_height);
 	delete matrix;
 }
