@@ -22,6 +22,9 @@ public:
 	// receives a width and height
 	static void init_game(const int, const int);
 
+	// calculate the state of each cell
+	// in the grid based on conway's rules
+	static void calc_grid(bool*, int, int);
 	static void draw(bool*, int, int);
 
 	static inline void set_game_width(int width) { game_width = width; }

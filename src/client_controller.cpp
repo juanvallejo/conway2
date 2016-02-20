@@ -107,7 +107,6 @@ void client::parse_game_data(const char* game_data) {
 			matrix[i - 4] = (game_data[i] == '1');
 	}
 
-	// std::cout << "off_x " << off_x << " off_y" << off_y << std::endl;
 	controller::draw(matrix, n_width, n_height);
 	delete matrix;
 }

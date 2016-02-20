@@ -71,6 +71,45 @@ void controller::draw(bool* matrix, int width, int height) {
 
 }
 
+// replaces old draw, renamed to calc_grid, which should be run on its own thread
+// takes full matrix, transforms into new 
+void controller::calc_grid(bool* matrix, int width, int height) {
+
+	for(int x = 0; x < height; x++) {
+		for(int y = 0; y < width; y++) {
+
+			int live_n = 0;
+
+			// check top neighbor
+			if(x > 1) {
+				if(matrix[(x - 1) * width + y]) { live_n++; }
+				// check top left neighbor
+				if(y > 1) { if(matrix[(x - 1) * width + (y - 1)]) { live_n++; } }
+				// check top right neighbor
+				if(y < width - 1) { if(matrix[(x - 1) * width + (y + 1)]) { live_n++; } }
+			}
+
+			// check bottom neighbor
+			if(x < height - 1) {
+				if(matrix[(x + 1) * width + y]) { live_n++; }
+				// check bottom left neighbor
+				if(y > 1) { if(matrix[(x + 1) * width + (y - 1)]) { live_n++; } }
+				// check bottom right neighbor
+				if(y < width - 1) { if(matrix[(x + 1) * width + (y + 1)]) { live_n++; } }
+			}
+
+			// check left neighbor
+			if(y > 1) { if(matrix[x * width + (y - 1)]) { live_n++; } }
+			// check right neighbor
+			if(y < width - 1) { if(matrix[x * width + (y + 1)]) { live_n++; } }
+
+			if(live_n < 2 || live_n > 3) { matrix[x * width + y] = false; }
+			if(live_n == 3) { matrix[x * width + y] = true; }
+		}
+	}
+
+}
+
 void controller::init_game(const int width, const int height) {
 
 	std::srand(std::time(0));
