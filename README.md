@@ -56,8 +56,9 @@ The example below runs a game client, displaying the `top right` part of the gri
 ### Options
 
 Available grid display options are:
-	- `--tl` to display the top left part of the grid
-	- `--tr` to display the top right part of the grid
-	- `--bl` to display the bottom left part of the grid
-	- `--br` to display the bottom right part of the grid
-	- `--no` to prevent the grid from being displayed
+
+- `--tl` to display the top left part of the grid
+- `--tr` to display the top right part of the grid
+- `--bl` to display the bottom left part of the grid
+- `--br` to display the bottom right part of the grid
+- `--no` to prevent the grid from being displayed
