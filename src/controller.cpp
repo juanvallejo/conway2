@@ -12,7 +12,10 @@
 #include "client_controller.h"
 
 std::mutex controller::cmutex;
+
 timespec controller::timer = {0};
+controller::Grid controller::grid_display = controller::Grid::GRID_DISPLAY_ALL;
+bool* controller::temp_game_matrix = NULL;
 
 int controller::game_width = 0;
 int controller::game_height = 0;
@@ -27,44 +30,15 @@ void controller::sigint_handler(int sig) {
 /**
  * Draw 2d grid to screen given a one-dimensional boolean
  * array, a width, and height
+ * TODO: decouple partial matrix draw from function
  */
 void controller::draw(bool* matrix, int width, int height) {
 
 	clear();
 
-	for(int x = 0; x < height; x++) {
-		for(int y = 0; y < width; y++) {
-			printw("%3s", matrix[x * width + y] ? " x " : "   ");
-
-			int live_n = 0;
-
-			// check top neighbor
-			if(x > 1) {
-				if(matrix[(x - 1) * width + y]) { live_n++; }
-				// check top left neighbor
-				if(y > 1) { if(matrix[(x - 1) * width + (y - 1)]) { live_n++; } }
-				// check top right neighbor
-				if(y < width - 1) { if(matrix[(x - 1) * width + (y + 1)]) { live_n++; } }
-			}
-
-			// check bottom neighbor
-			if(x < height - 1) {
-				if(matrix[(x + 1) * width + y]) { live_n++; }
-				// check bottom left neighbor
-				if(y > 1) { if(matrix[(x + 1) * width + (y - 1)]) { live_n++; } }
-				// check bottom right neighbor
-				if(y < width - 1) { if(matrix[(x + 1) * width + (y + 1)]) { live_n++; } }
-			}
-
-			// check left neighbor
-			if(y > 1) { if(matrix[x * width + (y - 1)]) { live_n++; } }
-			// check right neighbor
-			if(y < width - 1) { if(matrix[x * width + (y + 1)]) { live_n++; } }
-
-			if(live_n < 2 || live_n > 3) { matrix[x * width + y] = false; }
-			if(live_n == 3) { matrix[x * width + y] = true; }
-		}
-		printw("\n");
+	for(int i = 0; i < width * height; i++) {
+		printw("%3s", matrix[i] ? " x " : "   ");
+		if((i + 1) % width == 0) printw("\n");
 	}
 
 	refresh();
@@ -110,6 +84,65 @@ void controller::calc_grid(bool* matrix, int width, int height) {
 
 }
 
+// returns full game matrix, or a partial
+// game matrix depending on the value of grid_display
+bool* controller::get_partial_game_matrix(bool* matrix, int width, int height) {
+
+	if(controller::grid_display == controller::Grid::GRID_DISPLAY_ALL)
+		return matrix;
+
+	int off_x = 0;
+	int off_y = 0;
+
+	int matrix_cell = 0;
+	
+	int n_width = width / 2;
+	int n_height = height / 2;
+
+	bool* n_matrix = controller::set_temp_game_matrix(new bool[n_width * n_height]);
+	memset(n_matrix, false, n_width * n_height);
+
+	if(controller::grid_display == controller::Grid::GRID_DISPLAY_TR)
+		off_y = n_width;
+	if(controller::grid_display == controller::Grid::GRID_DISPLAY_BL)
+		off_x = n_height;
+	if(controller::grid_display == controller::Grid::GRID_DISPLAY_BR) {
+		off_y = n_width;
+		off_x = n_height;
+	}
+
+	for(int i = 0; i < (width * height); i++) {		
+		if(i % width >= off_y && i % width < off_y + n_width) {
+			if(std::floor(i / width) >= off_x && std::floor(i / width) < off_x + n_height) {
+				matrix_cell = ((std::floor(i / width) - off_x) * n_width) + (i % n_width);
+				n_matrix[matrix_cell] = matrix[i];
+			}
+		}
+	}
+
+	return n_matrix;
+
+}
+
+int controller::get_partial_game_width() {
+	if(controller::grid_display == controller::Grid::GRID_DISPLAY_ALL)
+		return controller::get_game_width();
+	return controller::get_game_width() / 2;
+}
+
+int controller::get_partial_game_height() {
+	if(controller::grid_display == controller::Grid::GRID_DISPLAY_ALL)
+		return controller::get_game_height();
+	return controller::get_game_height() / 2;
+}
+
+bool* controller::set_temp_game_matrix(bool* n_matrix) {
+	if(controller::temp_game_matrix && controller::temp_game_matrix != NULL) 
+		delete temp_game_matrix;
+	controller::temp_game_matrix = n_matrix;
+	return controller::temp_game_matrix;
+}
+
 void controller::init_game(const int width, const int height) {
 
 	std::srand(std::time(0));
@@ -133,8 +166,11 @@ void controller::init_game(const int width, const int height) {
 		if(std::rand() % 100 < 15) { controller::get_game_matrix()[i] = true; }
 	}
 
+	controller::grid_display = controller::Grid::GRID_DISPLAY_BR;
+
 	while(true) {
-		controller::draw(controller::get_game_matrix(), controller::get_game_width(), controller::get_game_height());
+		controller::draw(controller::get_partial_game_matrix(), controller::get_partial_game_width(), controller::get_partial_game_height());
+		controller::calc_grid(controller::get_game_matrix(), controller::get_game_width(), controller::get_game_height());
 		controller::sleep(229);
 	}
 
@@ -152,16 +188,16 @@ void controller::init_server(const int width, const int height) {
 void controller::init_client(char* arg) {
 	if(arg != NULL) {
 		if(std::strcmp(arg, "--tl") == 0)
-			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_TL);
+			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_TL);
 		if(std::strcmp(arg, "--tr") == 0)
-			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_TR);
+			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_TR);
 		if(std::strcmp(arg, "--bl") == 0)
-			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_BL);
+			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_BL);
 		if(std::strcmp(arg, "--br") == 0)
-			client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_BR);
+			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_BR);
 		return;
 	}
-	client::init(DEFAULT_TCP_PORT, client::Grid::GRID_DISPLAY_ALL);
+	client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_ALL);
 }
 
 timespec* controller::get_timer(int timeout) {
