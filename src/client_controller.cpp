@@ -1,4 +1,5 @@
 #include <iostream>
+#include <asio.hpp>
 #include <ncurses.h>
 #include "controller.h"
 #include "client_controller.h"
@@ -79,7 +80,7 @@ void client::parse_game_data(const char* game_data) {
 	for(int i = 4; i < (width * height) + 4; i++) {
 		matrix[i - 4] = (game_data[i] == '1');
 	}
-	
+
 	if(controller::grid_display != controller::Grid::GRID_DISPLAY_NO)
 		controller::draw(controller::get_partial_game_matrix(matrix, width, height), n_width, n_height);
 	delete matrix;
