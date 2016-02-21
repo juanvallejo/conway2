@@ -17,7 +17,7 @@ sudo apt-get install libncurses-dev
 - Requires the following dependencies:
 
 ```
-brew install ncurses
+brew install ncurses asio
 ```
 
 ## Building
@@ -62,3 +62,7 @@ Available grid display options are:
 - `--bl` to display the bottom left part of the grid
 - `--br` to display the bottom right part of the grid
 - `--no` to prevent the grid from being displayed
+
+## TODO
+
+Switch from asio to boost::asio for linux support
