@@ -5,12 +5,10 @@
 
 bool client::REQUEST_SERVER_DATA = true;
 
-void client::init(const short port, enum controller::Grid g_disp) {
+void client::init(const short port) {
 
 	signal(SIGINT, controller::sigint_handler);
 	initscr();
-
-	controller::grid_display = g_disp;
 
 	try {
 		asio::io_service io_service;

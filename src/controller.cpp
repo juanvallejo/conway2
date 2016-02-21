@@ -147,14 +147,17 @@ void controller::init_game(const int width, const int height) {
 
 	std::srand(std::time(0));
 
-	int ns_width;
-	int ns_height;
+	int ns_width = width;
+	int ns_height = height;
 
 	// ncurses init
 	signal(SIGINT, sigint_handler);
 	initscr();
-	getmaxyx(stdscr, ns_width, ns_height);
 
+	if(CONSTRAIN_GRID) {
+		getmaxyx(stdscr, ns_width, ns_height);
+	}
+	
 	controller::set_game_width(std::min(width, ns_width));
 	controller::set_game_height(std::min(height, ns_height));
 
@@ -165,8 +168,6 @@ void controller::init_game(const int width, const int height) {
 	for(int i = 0; i < controller::get_game_width() * controller::get_game_height(); i++) {
 		if(std::rand() % 100 < 15) { controller::get_game_matrix()[i] = true; }
 	}
-
-	controller::grid_display = controller::Grid::GRID_DISPLAY_BR;
 
 	while(true) {
 		controller::draw(controller::get_partial_game_matrix(), controller::get_partial_game_width(), controller::get_partial_game_height());
@@ -185,19 +186,8 @@ void controller::init_server(const int width, const int height) {
 	tgame.join();
 }
 
-void controller::init_client(char* arg) {
-	if(arg != NULL) {
-		if(std::strcmp(arg, "--tl") == 0)
-			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_TL);
-		if(std::strcmp(arg, "--tr") == 0)
-			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_TR);
-		if(std::strcmp(arg, "--bl") == 0)
-			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_BL);
-		if(std::strcmp(arg, "--br") == 0)
-			client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_BR);
-		return;
-	}
-	client::init(DEFAULT_TCP_PORT, controller::Grid::GRID_DISPLAY_ALL);
+void controller::init_client() {
+	client::init(DEFAULT_TCP_PORT);
 }
 
 timespec* controller::get_timer(int timeout) {

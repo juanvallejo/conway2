@@ -2,6 +2,7 @@
  #define CONTROLLER_H
 
 const short DEFAULT_TCP_PORT = 8000;
+const bool CONSTRAIN_GRID = false;
 
 class controller {
 private:
@@ -27,7 +28,7 @@ public:
 	// initialize server controller
 	// handles game data transfer
 	static void init_server(const int, const int);
-	static void init_client(char *);
+	static void init_client();
 
 	// initialize main game matrix
 	// receives a width and height
