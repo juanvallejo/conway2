@@ -20,7 +20,8 @@ public:
 		GRID_DISPLAY_TL,
 		GRID_DISPLAY_TR,
 		GRID_DISPLAY_BL,
-		GRID_DISPLAY_BR
+		GRID_DISPLAY_BR,
+		GRID_DISPLAY_NO
 	};
 
 	static Grid grid_display;

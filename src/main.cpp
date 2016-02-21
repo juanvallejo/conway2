@@ -10,6 +10,8 @@ void set_grid_display(char* g_disp) {
 		controller::grid_display = controller::Grid::GRID_DISPLAY_BL;
 	if(std::strcmp(g_disp, "--br") == 0)
 		controller::grid_display = controller::Grid::GRID_DISPLAY_BR;
+	if(std::strcmp(g_disp, "--no") == 0)
+		controller::grid_display = controller::Grid::GRID_DISPLAY_NO;
 }
 
 int main(int argc, char** argv) {

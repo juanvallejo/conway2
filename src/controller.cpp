@@ -170,7 +170,8 @@ void controller::init_game(const int width, const int height) {
 	}
 
 	while(true) {
-		controller::draw(controller::get_partial_game_matrix(), controller::get_partial_game_width(), controller::get_partial_game_height());
+		if(controller::grid_display != controller::Grid::GRID_DISPLAY_NO)
+			controller::draw(controller::get_partial_game_matrix(), controller::get_partial_game_width(), controller::get_partial_game_height());
 		controller::calc_grid(controller::get_game_matrix(), controller::get_game_width(), controller::get_game_height());
 		controller::sleep(229);
 	}
